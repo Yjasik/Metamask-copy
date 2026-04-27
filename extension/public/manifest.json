@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Metamask Copy",
+  "version": "1.0.0",
+  "description": "CryptoWallet на TypeScript + React + viem",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Wallet"
+  },
+  "permissions": ["storage", "activeTab", "identity"]
+  
+}

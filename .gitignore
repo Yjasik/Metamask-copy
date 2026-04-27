@@ -1,0 +1,8 @@
+# Зависимости
+node_modules/
+dist/
+*.log
+.env
+.DS_Storenode_modules/
+dist/
+.history/
