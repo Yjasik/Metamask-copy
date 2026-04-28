@@ -14,6 +14,8 @@ function App() {
           <img src={heroImg} className="base" width="170" height="179" alt="" />
           <img src={reactLogo} className="framework" alt="React logo" />
           <img src={viteLogo} className="vite" alt="Vite logo" />
+          <img src="/assets/arromLeft_M.png" width="120" alt="Bridge" />
+          <img src="/assets/buy_M.png" width="120" alt="Bridge" />
         </div>
         <div>
           <h1>Get started</h1>
