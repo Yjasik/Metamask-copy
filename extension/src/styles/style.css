@@ -1,0 +1,316 @@
+/* ===== MetaMask Light Theme – Глобальные стили ===== */
+
+/* Подключаем шрифт Inter (как в оригинале) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Сброс дефолтов */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 360px;            /* фиксированная ширина расширения */
+  min-height: 600px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #ffffff;
+  color: #24272a;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Контейнер приложения */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  background: #ffffff;
+  border-radius: 0;         /* расширение без скругления */
+}
+
+/* ===== Типографика ===== */
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 500;
+}
+p {
+  margin: 0;
+}
+.text-xs {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.text-sm {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.text-md {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.text-lg {
+  font-size: 24px;
+  line-height: 1.2;
+}
+.text-xl {
+  font-size: 32px;
+  line-height: 1.2;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-bold {
+  font-weight: 700;
+}
+.text-muted {
+  color: #6a737d;
+}
+.text-default {
+  color: #24272a;
+}
+.text-primary {
+  color: #037dd6;           /* акцентный синий MetaMask */
+}
+.text-success {
+  color: #28a745;
+}
+.text-danger {
+  color: #d73a49;
+}
+
+/* ===== Фоны ===== */
+.bg-white {
+  background-color: #ffffff;
+}
+.bg-light {
+  background-color: #f5f5f5;
+}
+.bg-muted {
+  background-color: #f2f4f6; /* светлый серый для карточек, кнопок */
+}
+.bg-primary {
+  background-color: #037dd6;
+  color: #ffffff;
+}
+
+/* ===== Отступы ===== */
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.px-4 { padding-left: 16px; padding-right: 16px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+.py-3 { padding-top: 12px; padding-bottom: 12px; }
+.py-4 { padding-top: 16px; padding-bottom: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mr-2 { margin-right: 8px; }
+.mr-4 { margin-right: 16px; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+
+/* ===== Flex-утилиты ===== */
+.flex { display: flex; }
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.min-w-0 { min-width: 0; }
+
+/* ===== Кнопки действий (как в MetaMask) ===== */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 16px;
+}
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  background-color: #f2f4f6;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.action-btn:hover {
+  background-color: #ebedf0;
+}
+.action-btn:active {
+  background-color: #dde0e4;
+}
+.action-btn .icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.7;
+}
+.action-btn .label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #24272a;
+}
+/* иконки можно задать как background-image, если используем SVG inline */
+.icon-buy {
+  background-image: url('../public/assets/buy_M.png'); /* пример */
+}
+.icon-send {
+  background-image: url('../public/assets/send_M.png');
+}
+.icon-swap {
+  background-image: url('../public/assets/swap_M.png');
+}
+.icon-receive {
+  background-image: url('../public/assets/import_M.png');
+}
+
+/* ===== Баланс ===== */
+.balance-display {
+  text-align: center;
+  padding: 20px 16px 16px;
+}
+.balance-amount {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #24272a;
+}
+.balance-fiat {
+  font-size: 16px;
+  color: #6a737d;
+  margin-top: 4px;
+}
+
+/* ===== Вкладки (Токены, DeFi, NFT, Деятельность) ===== */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #d6d9dc;
+  margin: 0 16px;
+}
+.tab {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6a737d;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab:hover {
+  color: #24272a;
+}
+.tab.active {
+  color: #037dd6;
+  border-bottom-color: #037dd6;
+}
+
+/* ===== Список токенов ===== */
+.token-list {
+  margin: 12px 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.token-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f2f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.token-item:last-child {
+  border-bottom: none;
+}
+.token-item:hover {
+  background-color: #fafbfc;
+}
+.token-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.token-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f2f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #037dd6;
+}
+.token-name {
+  font-weight: 500;
+  font-size: 16px;
+}
+.token-symbol {
+  font-size: 14px;
+  color: #6a737d;
+}
+.token-balance {
+  text-align: right;
+}
+.token-amount {
+  font-weight: 500;
+}
+.token-value {
+  font-size: 14px;
+  color: #6a737d;
+}
+
+/* ===== Шапка приложения ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f2f4f6;
+}
+.app-logo {
+  font-size: 18px;
+  font-weight: 600;
+}
+.network-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f2f4f6;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #24272a;
+  cursor: pointer;
+}
+
+/* ===== Прокрутка ===== */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}

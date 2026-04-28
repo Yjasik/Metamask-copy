@@ -7,6 +7,10 @@
     "default_popup": "index.html",
     "default_title": "Wallet"
   },
-  "permissions": ["storage", "activeTab", "identity"]
-  
+  "permissions": ["storage", "activeTab", "identity"],
+  "icons": {
+    "16": "favicon.svg",
+    "48": "favicon.svg",
+    "128": "favicon.svg"
+  }
 }
