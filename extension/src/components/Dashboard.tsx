@@ -1,35 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import TokenList from './TokenList';
 
 interface DashboardProps {
   onNavigate: (screen: 'send' | 'buy' | 'import') => void;
+  walletData?: {
+    address: string | null;
+    balance: string;
+    fetchBalance: () => Promise<void>;
+    chain: { name: string };
+  };
 }
 
-// Пример данных токенов (заглушка)
-const MOCK_TOKENS = [
-  {
-    symbol: 'ETH',
-    name: 'SepoliaETH',
-    balance: '2,793',
-    usdValue: '$5,248.42',
-    iconLetter: 'S',
-  },
-  {
-    symbol: 'USDC',
-    name: 'USDC',
-    balance: '987,970',
-    usdValue: '$987.97',
-    iconLetter: 'U',
-  },
-];
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData }) => {
+  // При монтировании или изменении адреса можно запросить баланс
+  useEffect(() => {
+    if (walletData?.address) {
+      walletData.fetchBalance();
+    }
+  }, [walletData?.address]);
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+  const formattedAddress = walletData?.address
+    ? `${walletData.address.slice(0, 6)}...${walletData.address.slice(-4)}`
+    : '';
+
   return (
     <div className="flex flex-col flex-1">
       {/* Баланс */}
       <div className="balance-display">
-        <div className="balance-amount">2,793 SepoliaETH</div>
-        <div className="balance-fiat">$5,248.42 USD</div>
+        <div className="balance-amount">
+          {walletData?.balance || '0'} {walletData?.chain?.name || 'ETH'}
+        </div>
+        <div className="balance-fiat">
+          {walletData?.address ? (
+            <span className="text-sm text-muted">{formattedAddress}</span>
+          ) : (
+            '$0.00 USD'
+          )}
+        </div>
       </div>
 
       {/* Кнопки действий */}
@@ -60,11 +67,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         <button className="tab">Деятельность</button>
       </div>
 
-      {/* Список токенов через компонент */}
+      {/* Список токенов */}
       <TokenList
-        tokens={MOCK_TOKENS}
+        tokens={[
+          {
+            symbol: 'ETH',
+            name: 'Ethereum',
+            balance: walletData?.balance || '0',
+            usdValue: '$0.00',
+            iconLetter: 'E',
+          },
+        ]}
         onTokenClick={(token) => {
-          // Например, переход на страницу деталей токена (пока нет)
           console.log('Token clicked:', token.name);
         }}
       />

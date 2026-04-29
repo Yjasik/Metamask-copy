@@ -5,31 +5,34 @@ import BuyScreen from './components/BuyScreen';
 import SendScreen from './components/SendScreen';
 import ImportWallet from './components/ImportWallet';
 import Login from './components/Login';
+import { useAuth } from './hooks/useAuth';
 
 type Screen = 'dashboard' | 'send' | 'buy' | 'import';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const auth = useAuth();
   const [screen, setScreen] = useState<Screen>('dashboard');
 
   const goTo = (s: Screen) => setScreen(s);
 
-  // Если не залогинен – показываем Login
-  if (!isLoggedIn) {
+  // Если не залогинены – показываем экран входа
+  if (!auth.isLoggedIn) {
     return (
       <Login
-        onLogin={() => setIsLoggedIn(true)}
+        onLogin={async (password: string) => {
+          await auth.login(password); // auth.login уже пробрасывает ошибку, если пароль неверный
+        }}
         onImport={() => {
-          setIsLoggedIn(true);
+          // При импорте мы сначала должны создать/импортировать кошелёк,
+          // потом авторизоваться. Пока оставляем переход на экран импорта.
           setScreen('import');
         }}
       />
     );
   }
 
-  // Основной интерфейс
+  // Основной интерфейс после входа
   let content: React.ReactNode;
-
   switch (screen) {
     case 'send':
       content = <SendScreen onBack={() => goTo('dashboard')} />;
@@ -38,19 +41,31 @@ function App() {
       content = <BuyScreen onBack={() => goTo('dashboard')} />;
       break;
     case 'import':
-      content = <ImportWallet onBack={() => goTo('dashboard')} />;
+      content = (
+        <ImportWallet
+          onBack={() => goTo('dashboard')}
+          wallet={auth.wallet}
+          onImportSuccess={() => {
+            auth.setIsLoggedIn(true);
+            goTo('dashboard');
+          }}
+        />
+      );
       break;
     default:
-      content = <Dashboard onNavigate={goTo} />;
+      // В Dashboard теперь можно передать данные из auth.wallet (address, balance и т.д.)
+      content = (
+        <Dashboard
+          onNavigate={goTo}
+          walletData={auth.wallet} // опционально, если Dashboard ожидает такие пропсы
+        />
+      );
   }
-
-  // На главном экране кнопка "Назад" не нужна, на остальных — нужна
-  const showBack = screen !== 'dashboard';
 
   return (
     <Layout
       title="Wallet"
-      onBack={showBack ? () => goTo('dashboard') : undefined}
+      onBack={screen !== 'dashboard' ? () => goTo('dashboard') : undefined}
       networkName="Ethereum"
     >
       {content}

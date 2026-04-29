@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
 
 interface LoginProps {
-  onLogin: () => void;         // вызывается при успешном входе
-  onImport: () => void;        // переход на экран импорта / создания
+  onLogin: (password: string) => Promise<void>;
+  onImport: () => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin, onImport }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Простейшая проверка пароля (заглушка)
     if (password.length < 8) {
       setError('Пароль должен содержать не менее 8 символов.');
       return;
     }
-
-    // Здесь будет реальная проверка пароля (например, расшифровка сохранённого keystore)
-    // Пока просто вызываем onLogin
-    onLogin();
+    setIsLoading(true);
+    try {
+      await onLogin(password);
+    } catch (err: any) {
+      setError(err.message || 'Неверный пароль');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,10 +45,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImport }) => {
             id="password"
             type="password"
             value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError('');
-            }}
+            onChange={(e) => { setPassword(e.target.value); setError(''); }}
             placeholder="Ваш пароль"
             className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
           />
@@ -55,14 +55,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onImport }) => {
 
         <button
           type="submit"
-          disabled={!password.trim()}
+          disabled={!password.trim() || isLoading}
           className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-            password.trim()
+            password.trim() && !isLoading
               ? 'bg-primary text-white hover:bg-primary-dark'
               : 'bg-muted text-muted cursor-not-allowed'
           }`}
         >
-          Разблокировать
+          {isLoading ? 'Проверка...' : 'Разблокировать'}
         </button>
       </form>
 
