@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from './useWallet';
+import { registerUser, loginUser } from '../lib/apiClient';
 
 declare const chrome: any;
+
 const SESSION_KEY = 'session';
+const AUTH_TOKEN_KEY = 'authToken';
+const USER_ID_KEY = 'userId';
 
 function getStorage() {
   return chrome.storage.local;
@@ -15,42 +19,80 @@ export function useAuth() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // При первом рендере проверяем, была ли сохранена сессия
   useEffect(() => {
-    getStorage().get(SESSION_KEY, (result: { [SESSION_KEY]?: boolean }) => {
+    getStorage().get([SESSION_KEY, USER_ID_KEY], (result: any) => {
       if (result[SESSION_KEY]) {
-        // Сессия есть, но кошелёк ещё заблокирован – пользователь должен ввести пароль
-        // Оставляем isLoggedIn = false
+        setIsLoggedIn(true);
+      }
+      if (result[USER_ID_KEY]) {
+        setUserId(result[USER_ID_KEY]);
       }
     });
   }, []);
 
-  /**
-   * Вход в кошелёк: разблокировка с помощью пароля
-   */
+  // Вход локальным паролем
   const login = useCallback(async (password: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      await wallet.unlockWallet(password); // бросает ошибку при неверном пароле
+      await wallet.unlockWallet(password);
       await getStorage().set({ [SESSION_KEY]: true });
       setIsLoggedIn(true);
     } catch (e: any) {
       setError(e.message || 'Неверный пароль');
-      throw e; // пробрасываем ошибку, чтобы Login мог её показать
+      throw e;
     } finally {
       setIsLoading(false);
     }
   }, [wallet]);
 
-  /**
-   * Выход: блокировка кошелька и удаление сессии
-   */
+  // Регистрация через бэкенд + сохранение токена
+  const register = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { accessToken, refreshToken } = await registerUser(email, password);
+      await getStorage().set({
+        [AUTH_TOKEN_KEY]: accessToken,
+        [USER_ID_KEY]: email, // временно, лучше заменить на реальный userId из ответа
+      });
+      setUserId(email);
+      setIsLoggedIn(true);
+    } catch (e: any) {
+      setError(e.message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Вход через бэкенд (если уже зарегистрирован)
+  const loginWithBackend = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { accessToken, refreshToken } = await loginUser(email, password);
+      await getStorage().set({
+        [AUTH_TOKEN_KEY]: accessToken,
+        [USER_ID_KEY]: email,
+      });
+      setUserId(email);
+      setIsLoggedIn(true);
+    } catch (e: any) {
+      setError(e.message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     wallet.lockWallet();
-    await getStorage().remove(SESSION_KEY);
+    await getStorage().remove([SESSION_KEY, AUTH_TOKEN_KEY, USER_ID_KEY]);
     setIsLoggedIn(false);
+    setUserId(null);
   }, [wallet]);
 
   return {
@@ -59,7 +101,10 @@ export function useAuth() {
     isLoading,
     error,
     login,
+    register,
+    loginWithBackend,
     logout,
-    wallet, // проксируем весь кошелёк (account, balance, fetchBalance, import...)
+    wallet,
+    userId,
   };
 }

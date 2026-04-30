@@ -20,17 +20,20 @@ function App() {
     return (
       <Login
         onLogin={async (password: string) => {
-          await auth.login(password); // auth.login уже пробрасывает ошибку, если пароль неверный
+          await auth.login(password);
+        }}
+        onBackendLogin={async (email, password) => {
+          await auth.loginWithBackend(email, password);
+        }}
+        onBackendRegister={async (email, password) => {
+          await auth.register(email, password);
         }}
         onImport={() => {
-          // При импорте мы сначала должны создать/импортировать кошелёк,
-          // потом авторизоваться. Пока оставляем переход на экран импорта.
           setScreen('import');
         }}
       />
     );
   }
-
   // Основной интерфейс после входа
   let content: React.ReactNode;
   switch (screen) {
@@ -57,7 +60,8 @@ function App() {
       content = (
         <Dashboard
           onNavigate={goTo}
-          walletData={auth.wallet} // опционально, если Dashboard ожидает такие пропсы
+          walletData={auth.wallet} 
+          onLogout={auth.logout} // опционально, если Dashboard ожидает такие пропсы
         />
       );
   }

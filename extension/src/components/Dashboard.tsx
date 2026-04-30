@@ -9,10 +9,10 @@ interface DashboardProps {
     fetchBalance: () => Promise<void>;
     chain: { name: string };
   };
+  onLogout: () => void; // <-- новый проп
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData }) => {
-  // При монтировании или изменении адреса можно запросить баланс
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData, onLogout }) => {
   useEffect(() => {
     if (walletData?.address) {
       walletData.fetchBalance();
@@ -25,8 +25,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData }) => {
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Баланс */}
-      <div className="balance-display">
+      {/* Баланс и кнопка выхода в одной строке */}
+      <div className="balance-display relative">
         <div className="balance-amount">
           {walletData?.balance || '0'} {walletData?.chain?.name || 'ETH'}
         </div>
@@ -37,6 +37,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData }) => {
             '$0.00 USD'
           )}
         </div>
+        {/* Кнопка выхода справа вверху */}
+        <button
+          onClick={onLogout}
+          className="absolute top-2 right-2 text-xs text-muted hover:text-danger transition-colors"
+          title="Выйти"
+        >
+          Выйти
+        </button>
       </div>
 
       {/* Кнопки действий */}
