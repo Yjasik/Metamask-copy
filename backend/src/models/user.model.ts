@@ -1,8 +1,5 @@
-// backend/src/models/user.model.ts
-
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Интерфейс для TypeScript
 export interface IUser extends Document {
   email: string;
   passwordHash: string;
@@ -15,14 +12,14 @@ const userSchema = new Schema<IUser>(
   {
     email: {
       type: String,
-      required: [true, 'Email обязателен'],
+      required: [true, 'Email is required'],
       unique: true,
       lowercase: true,
       trim: true,
     },
     passwordHash: {
       type: String,
-      required: [true, 'Хеш пароля обязателен'],
+      required: [true, 'Password hash is required'],
     },
     refreshToken: {
       type: String,
@@ -30,11 +27,10 @@ const userSchema = new Schema<IUser>(
     },
   },
   {
-    timestamps: true, // автоматически добавляет createdAt и updatedAt
+    timestamps: true, 
   }
 );
 
-// Создаём модель
 const User = mongoose.model<IUser>('User', userSchema);
 
 export default User;

@@ -1,5 +1,3 @@
-// backend/src/routes/account.routes.ts
-
 import { Router } from 'express';
 import authMiddleware from '../middleware/auth';
 import { getAccounts, createAccount, updateAccount, deleteAccount } from '../controllers/account.controller';

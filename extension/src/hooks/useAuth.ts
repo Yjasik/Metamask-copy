@@ -1,5 +1,3 @@
-// extension/src/hooks/useAuth.ts
-
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from './useWallet';
 import { registerUser, loginUser } from '../lib/apiClient';
@@ -32,7 +30,6 @@ export function useAuth() {
     });
   }, []);
 
-  // Вход локальным паролем
   const login = useCallback(async (password: string) => {
     setIsLoading(true);
     setError(null);
@@ -41,14 +38,13 @@ export function useAuth() {
       await getStorage().set({ [SESSION_KEY]: true });
       setIsLoggedIn(true);
     } catch (e: any) {
-      setError(e.message || 'Неверный пароль');
+      setError(e.message || 'Incorrect password');
       throw e;
     } finally {
       setIsLoading(false);
     }
   }, [wallet]);
 
-  // Регистрация через бэкенд + сохранение токена
   const register = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);
@@ -56,7 +52,7 @@ export function useAuth() {
       const { accessToken, refreshToken } = await registerUser(email, password);
       await getStorage().set({
         [AUTH_TOKEN_KEY]: accessToken,
-        [USER_ID_KEY]: email, // временно, лучше заменить на реальный userId из ответа
+        [USER_ID_KEY]: email,
       });
       setUserId(email);
       setIsLoggedIn(true);
@@ -68,7 +64,6 @@ export function useAuth() {
     }
   }, []);
 
-  // Вход через бэкенд (если уже зарегистрирован)
   const loginWithBackend = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     setError(null);

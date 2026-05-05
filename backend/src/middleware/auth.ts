@@ -1,9 +1,6 @@
-// backend/src/middleware/auth.ts
-
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Расширяем тип Request, чтобы поместить userId
 export interface AuthRequest extends Request {
   userId?: string;
 }
@@ -16,7 +13,7 @@ const authMiddleware = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Не предоставлен токен авторизации' });
+    res.status(401).json({ error: 'Authorization token not provided' });
     return;
   }
 
@@ -31,7 +28,7 @@ const authMiddleware = (
     req.userId = payload.userId;
     next();
   } catch (error) {
-    res.status(401).json({ error: 'Недействительный или истёкший токен' });
+    res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
 

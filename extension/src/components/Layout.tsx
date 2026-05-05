@@ -1,35 +1,48 @@
 import React from 'react';
+import type { Chain } from 'viem';
 
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
   onBack?: () => void;
-  networkName?: string; // чтобы позже можно было менять сеть
+  currentChain: Chain;
+  supportedChains: Chain[];
+  onSwitchChain: (chainId: number) => void;
 }
 
 const Layout: React.FC<LayoutProps> = ({
   children,
   title = 'Wallet',
   onBack,
-  networkName = 'Ethereum',
+  currentChain,
+  supportedChains,
+  onSwitchChain,
 }) => {
   return (
     <div className="app">
-      {/* Шапка */}
       <header className="app-header">
         {onBack ? (
-          <button onClick={onBack} className="text-primary text-sm font-medium mr-4">
-            ← Назад
+          <button onClick={onBack} className="link-btn" style={{ fontSize: 16 }}>
+            ← Back
           </button>
         ) : (
           <div className="app-logo">{title}</div>
         )}
-        <div className="network-selector">
-          <span>{networkName}</span>
-        </div>
+
+        {/* Network selector in updated style */}
+        <select
+          className="network-selector"
+          value={currentChain.id}
+          onChange={(e) => onSwitchChain(Number(e.target.value))}
+        >
+          {supportedChains.map((chain) => (
+            <option key={chain.id} value={chain.id}>
+              {chain.name}
+            </option>
+          ))}
+        </select>
       </header>
 
-      {/* Содержимое страницы */}
       <main className="flex flex-col flex-1">{children}</main>
     </div>
   );

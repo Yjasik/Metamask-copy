@@ -6,8 +6,10 @@ import SendScreen from './components/SendScreen';
 import ImportWallet from './components/ImportWallet';
 import Login from './components/Login';
 import { useAuth } from './hooks/useAuth';
+import AddToken from './components/AddToken';
+import { supportedChains } from './lib/chains'; 
 
-type Screen = 'dashboard' | 'send' | 'buy' | 'import';
+type Screen = 'dashboard' | 'send' | 'buy' | 'import' | 'addToken';
 
 function App() {
   const auth = useAuth();
@@ -15,7 +17,6 @@ function App() {
 
   const goTo = (s: Screen) => setScreen(s);
 
-  // Если не залогинены – показываем экран входа
   if (!auth.isLoggedIn) {
     return (
       <Login
@@ -34,11 +35,13 @@ function App() {
       />
     );
   }
-  // Основной интерфейс после входа
   let content: React.ReactNode;
   switch (screen) {
+    case 'addToken':
+      content = <AddToken onBack={() => goTo('dashboard')} />;
+      break;
     case 'send':
-      content = <SendScreen onBack={() => goTo('dashboard')} />;
+      content = <SendScreen onBack={() => goTo('dashboard')} wallet={auth.wallet} />;
       break;
     case 'buy':
       content = <BuyScreen onBack={() => goTo('dashboard')} />;
@@ -56,12 +59,11 @@ function App() {
       );
       break;
     default:
-      // В Dashboard теперь можно передать данные из auth.wallet (address, balance и т.д.)
       content = (
         <Dashboard
           onNavigate={goTo}
           walletData={auth.wallet} 
-          onLogout={auth.logout} // опционально, если Dashboard ожидает такие пропсы
+          onLogout={auth.logout}
         />
       );
   }
@@ -70,7 +72,9 @@ function App() {
     <Layout
       title="Wallet"
       onBack={screen !== 'dashboard' ? () => goTo('dashboard') : undefined}
-      networkName="Ethereum"
+      currentChain={auth.wallet.chain}
+      supportedChains={supportedChains}
+      onSwitchChain={(chainId) => auth.wallet.switchChain(chainId)}
     >
       {content}
     </Layout>

@@ -1,12 +1,11 @@
 import React from 'react';
 
-// Тип для одного токена
 interface Token {
   symbol: string;
   name: string;
   balance: string;
   usdValue: string;
-  iconLetter?: string; // первая буква для аватарки
+  iconLetter?: string; // first letter for avatar
 }
 
 interface TokenListProps {
@@ -19,7 +18,7 @@ const TokenList: React.FC<TokenListProps> = ({ tokens, onTokenClick, emptyMessag
   if (tokens.length === 0) {
     return (
       <div className="text-center text-muted text-sm py-6">
-        {emptyMessage || 'Нет токенов'}
+        {emptyMessage || 'No tokens'}
       </div>
     );
   }

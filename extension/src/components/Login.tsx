@@ -18,14 +18,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBackendLogin, onBackendRegiste
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('Пароль должен содержать не менее 8 символов.');
+      setError('Password must be at least 8 characters.');
       return;
     }
     setIsLoading(true);
     try {
       await onLogin(password);
     } catch (err: any) {
-      setError(err.message || 'Неверный пароль');
+      setError(err.message || 'Incorrect password');
     } finally {
       setIsLoading(false);
     }
@@ -35,7 +35,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBackendLogin, onBackendRegiste
     e.preventDefault();
     setError('');
     if (!email || !password) {
-      setError('Заполните все поля');
+      setError('Please fill in all fields');
       return;
     }
     setIsLoading(true);
@@ -46,102 +46,113 @@ const Login: React.FC<LoginProps> = ({ onLogin, onBackendLogin, onBackendRegiste
         await onBackendRegister(email, password);
       }
     } catch (err: any) {
-      setError(err.message || 'Ошибка');
+      setError(err.message || 'Error');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col flex-1 p-4 justify-center">
-      {mode === 'lock' && (
-        <>
-          <div className="mb-8 text-center">
-            <h1 className="text-xl font-bold mb-2">MetaMask Copy</h1>
-            <p className="text-sm text-muted">Введите пароль для разблокировки.</p>
+    <div className="flex flex-col flex-1 p-4 justify-center login-container">
+      <div className="card login-card">
+        {/* Logo / Title */}
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, #037dd6, #8B5CF6)',
+              margin: '0 auto 12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 28,
+              color: 'white',
+              fontWeight: 700,
+            }}
+          >
+            M
           </div>
+          <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0 }}>MetaMask Copy</h1>
+          {mode === 'lock' && (
+            <p style={{ color: '#6a737d', fontSize: 14, marginTop: 8 }}>
+              Enter your password to unlock
+            </p>
+          )}
+        </div>
+
+        {/* Unlock mode (local password) */}
+        {mode === 'lock' && (
           <form onSubmit={handleLockSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="text-sm text-muted mb-2 block">Пароль</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); setError(''); }}
-                placeholder="Пароль"
-                className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
-              />
-            </div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError(''); }}
+              placeholder="Password"
+              className="input-field"
+            />
             {error && <p className="text-danger text-sm">{error}</p>}
             <button
               type="submit"
               disabled={!password.trim() || isLoading}
-              className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-                password.trim() && !isLoading ? 'bg-primary text-white' : 'bg-muted text-muted cursor-not-allowed'
-              }`}
+              className="primary-btn"
             >
-              {isLoading ? 'Проверка...' : 'Разблокировать'}
+              {isLoading ? 'Checking...' : 'Unlock'}
             </button>
-          </form>
-          <div className="mt-6 text-center flex flex-col gap-2">
-            <button onClick={() => setMode('login')} className="text-primary text-sm font-medium hover:underline">
-              Войти через почту
-            </button>
-            <button onClick={() => setMode('register')} className="text-primary text-sm font-medium hover:underline">
-              Зарегистрироваться
-            </button>
-            <button onClick={onImport} className="text-primary text-sm font-medium hover:underline">
-              Импортировать кошелёк
-            </button>
-          </div>
-        </>
-      )}
 
-      {(mode === 'login' || mode === 'register') && (
-        <>
-          <div className="mb-8 text-center">
-            <h1 className="text-xl font-bold mb-2">
-              {mode === 'login' ? 'Вход' : 'Регистрация'}
-            </h1>
-          </div>
+            <div className="login-separator">
+              <span>or</span>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <button type="button" onClick={() => setMode('login')} className="link-btn">
+                Sign in with email
+              </button>
+              <button type="button" onClick={() => setMode('register')} className="link-btn">
+                Register
+              </button>
+              <button type="button" onClick={onImport} className="link-btn">
+                Import wallet
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Backend login / register mode */}
+        {(mode === 'login' || mode === 'register') && (
           <form onSubmit={handleBackendSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="text-sm text-muted mb-2 block">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
-                className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-muted mb-2 block">Пароль</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Пароль"
-                className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
-              />
-            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 600, textAlign: 'center', marginBottom: 4 }}>
+              {mode === 'login' ? 'Sign In' : 'Register'}
+            </h2>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="input-field"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="input-field"
+            />
             {error && <p className="text-danger text-sm">{error}</p>}
             <button
               type="submit"
               disabled={!email || !password || isLoading}
-              className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-                email && password && !isLoading ? 'bg-primary text-white' : 'bg-muted text-muted cursor-not-allowed'
-              }`}
+              className="primary-btn"
             >
-              {isLoading ? 'Обработка...' : mode === 'login' ? 'Войти' : 'Зарегистрироваться'}
+              {isLoading ? 'Processing...' : mode === 'login' ? 'Sign In' : 'Register'}
+            </button>
+            <button type="button" onClick={() => setMode('lock')} className="link-btn" style={{ marginTop: 4 }}>
+              ← Back
             </button>
           </form>
-          <div className="mt-4 text-center">
-            <button onClick={() => setMode('lock')} className="text-primary text-sm font-medium hover:underline">
-              ← Назад
-            </button>
-          </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 };

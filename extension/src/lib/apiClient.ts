@@ -1,5 +1,3 @@
-// extension/src/lib/apiClient.ts
-
 const BASE_URL = 'http://localhost:3001/api';
 declare const chrome: any;
 
@@ -31,7 +29,7 @@ export async function apiRequest<T = unknown>(
     if (token) {
       requestHeaders['Authorization'] = `Bearer ${token}`;
     } else {
-      throw new Error('Не авторизован');
+      throw new Error('Not authorized');
     }
   }
 
@@ -54,7 +52,6 @@ export async function apiRequest<T = unknown>(
   return response.json();
 }
 
-// Утилиты для аутентификации
 export async function registerUser(email: string, password: string) {
   return apiRequest<{ accessToken: string; refreshToken: string }>('/users/register', {
     method: 'POST',

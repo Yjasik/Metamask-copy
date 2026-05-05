@@ -8,27 +8,30 @@ import {
   type Transport,
   type Account,
 } from 'viem';
-import { privateKeyToAccount, mnemonicToAccount, type HDAccount, generateMnemonic as genMnemonic, english } from 'viem/accounts';
-import { defaultChain } from './chains'; // getChainById не используется, убран
+import {
+  privateKeyToAccount,
+  mnemonicToAccount,
+  type HDAccount,
+  generateMnemonic as genMnemonic,
+  english,
+} from 'viem/accounts';
+import { defaultChain } from './chains';
 
-/**
- * Создаёт публичного клиента для чтения данных из блокчейна.
- * @param chain - сеть (по умолчанию Sepolia)
- * @returns PublicClient
- */
+function getRpcUrl(chain: Chain): string | undefined {
+  if (chain.id === 11155111) {
+    return import.meta.env.VITE_SEPOLIA_RPC_URL || 'https://rpc.sepolia.org';
+  }
+  return undefined;
+}
+
 export function createViemPublicClient(chain: Chain = defaultChain): PublicClient {
+  const rpcUrl = getRpcUrl(chain);
   return createPublicClient({
     chain,
-    transport: http(),
+    transport: http(rpcUrl),
   });
 }
 
-/**
- * Создаёт кошелькового клиента для подписи транзакций.
- * @param privateKey - приватный ключ (0x...). Если не передан, клиент будет без аккаунта.
- * @param chain - сеть (по умолчанию Sepolia)
- * @returns WalletClient
- */
 export function createViemWalletClient(
   privateKey?: string,
   chain: Chain = defaultChain,
@@ -37,19 +40,14 @@ export function createViemWalletClient(
     ? privateKeyToAccount(privateKey as `0x${string}`)
     : undefined;
 
+  const rpcUrl = getRpcUrl(chain);
   return createWalletClient({
     chain,
-    transport: http(),
+    transport: http(rpcUrl),
     account,
   });
 }
 
-/**
- * Восстанавливает аккаунт из мнемонической фразы (BIP-39).
- * @param mnemonic - мнемоника (12/24 слова)
- * @param path - путь деривации (по умолчанию Ethereum: "m/44'/60'/0'/0/0")
- * @returns HDAccount
- */
 export function accountFromMnemonic(
   mnemonic: string,
   path: `m/44'/60'/${string}` = "m/44'/60'/0'/0/0",
@@ -57,10 +55,6 @@ export function accountFromMnemonic(
   return mnemonicToAccount(mnemonic, { path });
 }
 
-/**
- * Генерирует случайную мнемонику и возвращает аккаунт.
- * @returns { mnemonic: string; account: HDAccount }
- */
 export function generateMnemonic(): { mnemonic: string; account: HDAccount } {
   const mnemonic = genMnemonic(english);
   const account = accountFromMnemonic(mnemonic);

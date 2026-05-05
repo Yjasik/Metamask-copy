@@ -1,5 +1,3 @@
-// backend/src/controllers/account.controller.ts
-
 import { Response, NextFunction } from 'express';
 import Account from '../models/account.model';
 import { AuthRequest } from '../middleware/auth';
@@ -19,7 +17,7 @@ export async function createAccount(req: AuthRequest, res: Response, next: NextF
   try {
     const { address, encryptedPrivateKey, iv, salt, chainId } = req.body;
     if (!address || !encryptedPrivateKey || !iv || !salt || !chainId) {
-      res.status(400).json({ error: 'Все поля обязательны' });
+      res.status(400).json({ error: 'All fields are required' });
       return;
     }
 
@@ -29,7 +27,7 @@ export async function createAccount(req: AuthRequest, res: Response, next: NextF
       chainId,
     });
     if (exists) {
-      res.status(409).json({ error: 'Аккаунт с таким адресом уже сохранён' });
+      res.status(409).json({ error: 'Account with this address already saved' });
       return;
     }
 
@@ -42,7 +40,7 @@ export async function createAccount(req: AuthRequest, res: Response, next: NextF
       chainId,
     });
     await account.save();
-    res.status(201).json({ message: 'Аккаунт сохранён', accountId: account._id });
+    res.status(201).json({ message: 'Account saved', accountId: account._id });
   } catch (error) {
     next(error);
   }
@@ -61,10 +59,10 @@ export async function updateAccount(req: AuthRequest, res: Response, next: NextF
     );
 
     if (!account) {
-      res.status(404).json({ error: 'Аккаунт не найден' });
+      res.status(404).json({ error: 'Account not found' });
       return;
     }
-    res.json({ message: 'Аккаунт обновлён' });
+    res.json({ message: 'Account updated' });
   } catch (error) {
     next(error);
   }
@@ -76,10 +74,10 @@ export async function deleteAccount(req: AuthRequest, res: Response, next: NextF
     const { id } = req.params;
     const account = await Account.findOneAndDelete({ _id: id, userId: req.userId });
     if (!account) {
-      res.status(404).json({ error: 'Аккаунт не найден' });
+      res.status(404).json({ error: 'Account not found' });
       return;
     }
-    res.json({ message: 'Аккаунт удалён' });
+    res.json({ message: 'Account deleted' });
   } catch (error) {
     next(error);
   }

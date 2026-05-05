@@ -1,7 +1,5 @@
-// extension/src/hooks/useWallet.ts
-
 import { useState, useCallback, useEffect } from 'react';
-import { type Chain, type PrivateKeyAccount, formatEther } from 'viem';
+import { type Chain, type PrivateKeyAccount, formatEther, parseEther } from 'viem';
 import {
   createViemPublicClient,
   createViemWalletClient,
@@ -24,7 +22,6 @@ function getStorage() {
   return chrome.storage.local;
 }
 
-// Вспомогательная функция для преобразования Uint8Array в hex-строку
 function uint8ArrayToHex(bytes: Uint8Array): string {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -121,7 +118,6 @@ export function useWallet() {
   useEffect(() => {
     getStorage().get(STORAGE_KEY, (result: { [STORAGE_KEY]?: StoredData }) => {
       if (result[STORAGE_KEY]) {
-        // Данные есть, но не разблокируем автоматически
       }
     });
   }, []);
@@ -139,8 +135,7 @@ export function useWallet() {
         const { mnemonicToAccount } = await import('viem/accounts');
         const fullAccount = mnemonicToAccount(newMnemonic);
         const hdKey = fullAccount.getHdKey();
-        if (!hdKey.privateKey) throw new Error('Не удалось получить приватный ключ');
-        // В viem hdKey.privateKey это Uint8Array
+        if (!hdKey.privateKey) throw new Error('Failed to get private key');
         privateKey = `0x${uint8ArrayToHex(hdKey.privateKey)}`;
       }
 
@@ -150,7 +145,7 @@ export function useWallet() {
       setMnemonic(newMnemonic);
       setAccount(newAccount);
     } catch (e: any) {
-      setError(e.message || 'Ошибка создания кошелька');
+      setError(e.message || 'Failed to create wallet');
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +165,7 @@ export function useWallet() {
           const { mnemonicToAccount } = await import('viem/accounts');
           const fullAccount = mnemonicToAccount(mnemonic);
           const hdKey = fullAccount.getHdKey();
-          if (!hdKey.privateKey) throw new Error('Нет приватного ключа');
+          if (!hdKey.privateKey) throw new Error('No private key');
           privateKey = `0x${uint8ArrayToHex(hdKey.privateKey)}`;
         }
 
@@ -180,7 +175,7 @@ export function useWallet() {
         setMnemonic(mnemonic);
         setAccount(acc);
       } catch (e: any) {
-        setError(e.message || 'Ошибка импорта мнемоники');
+        setError(e.message || 'Failed to import mnemonic');
       } finally {
         setIsLoading(false);
       }
@@ -201,7 +196,7 @@ export function useWallet() {
         setAccount(acc);
         setMnemonic(null);
       } catch (e: any) {
-        setError(e.message || 'Ошибка импорта приватного ключа');
+        setError(e.message || 'Failed to import private key');
       } finally {
         setIsLoading(false);
       }
@@ -215,7 +210,7 @@ export function useWallet() {
     try {
       const result = await getStorage().get(STORAGE_KEY);
       const data = result[STORAGE_KEY] as StoredData | undefined;
-      if (!data) throw new Error('Нет сохранённого кошелька');
+      if (!data) throw new Error('No saved wallet');
 
       const privateKey = await decryptPrivateKey(
         data.encryptedKey,
@@ -228,7 +223,7 @@ export function useWallet() {
       const acc = privateKeyToAccount(privateKey as `0x${string}`);
       setAccount(acc);
     } catch (e: any) {
-      setError('Неверный пароль или данные повреждены');
+      setError('Incorrect password or corrupted data');
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +238,7 @@ export function useWallet() {
       const bal = await client.getBalance({ address: account.address });
       setBalance(formatEther(bal));
     } catch (e: any) {
-      setError('Ошибка получения баланса');
+      setError('Failed to fetch balance');
     } finally {
       setIsLoading(false);
     }
@@ -255,9 +250,29 @@ export function useWallet() {
       setChain(newChain);
       setError(null);
     } else {
-      setError('Сеть не найдена');
+      setError('Network not found');
     }
   }, []);
+
+  const sendTransaction = useCallback(async (to: string, amountEth: string) => {
+    if (!account) throw new Error('Wallet is locked');
+    setIsLoading(true);
+    setError(null);
+    try {
+      const walletClient = createViemWalletClient(account.privateKey, chain);
+      const txHash = await walletClient.sendTransaction({
+        to: to as `0x${string}`,
+        value: parseEther(amountEth),
+        account,
+      });
+      return txHash;
+    } catch (e: any) {
+      setError(e.message || 'Send failed');
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [account, chain]);
 
   const lockWallet = useCallback(() => {
     setAccount(null);
@@ -274,6 +289,7 @@ export function useWallet() {
     chain,
     isLoading,
     error,
+    sendTransaction,
     createWallet,
     importFromMnemonic,
     importFromPrivateKey,

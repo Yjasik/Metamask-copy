@@ -1,14 +1,12 @@
-// backend/src/models/account.model.ts
-
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IAccount extends Document {
-  userId: mongoose.Types.ObjectId; // ссылка на пользователя
-  address: string;                 // публичный адрес кошелька
-  encryptedPrivateKey: string;     // зашифрованный приватный ключ (AES-GCM, hex)
-  iv: string;                      // вектор инициализации (hex)
-  salt: string;                    // соль для PBKDF2 (hex)
-  chainId: number;                 // идентификатор сети (например, 11155111 для Sepolia)
+  userId: mongoose.Types.ObjectId; 
+  address: string;                
+  encryptedPrivateKey: string;     
+  iv: string;                    
+  salt: string;                   
+  chainId: number;                
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,29 +16,29 @@ const accountSchema = new Schema<IAccount>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'userId обязателен'],
+      required: [true, 'userId is required'],
       index: true,
     },
     address: {
       type: String,
-      required: [true, 'Адрес кошелька обязателен'],
+      required: [true, 'Wallet address is required'],
       lowercase: true,
     },
     encryptedPrivateKey: {
       type: String,
-      required: [true, 'Зашифрованный приватный ключ обязателен'],
+      required: [true, 'Encrypted private key is required'],
     },
     iv: {
       type: String,
-      required: [true, 'IV обязателен'],
+      required: [true, 'IV is required'],
     },
     salt: {
       type: String,
-      required: [true, 'Salt обязателен'],
+      required: [true, 'Salt is required'],
     },
     chainId: {
       type: Number,
-      required: [true, 'chainId обязателен'],
+      required: [true, 'chainId is required'],
     },
   },
   {

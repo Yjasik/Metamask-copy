@@ -8,75 +8,99 @@ const BuyScreen: React.FC<BuyScreenProps> = ({ onBack }) => {
   const [amount, setAmount] = useState('');
 
   const handleBuy = () => {
-    // Здесь будет логика покупки (пока заглушка)
-    alert(`Покупка ${amount} USD`);
+    alert(`Purchase ${amount} USD`);
   };
 
   return (
     <div className="flex flex-col flex-1 p-4">
-      {/* Заголовок и навигация */}
-      <div className="flex items-center mb-6">
-        <h2 className="text-lg font-semibold">Купить криптовалюту</h2>
-      </div>
+      <div className="card">
+        <h2 className="text-lg font-semibold mb-4" style={{ textAlign: 'center' }}>
+          Buy Crypto
+        </h2>
 
-      {/* Выбор провайдера */}
-      <div className="mb-6">
-        <label className="text-sm text-muted mb-2 block">Способ покупки</label>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center bg-light p-3 rounded-xl border border-gray-200 hover:border-primary cursor-pointer transition-colors">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-              <span className="font-bold text-primary">M</span>
+        {/* Provider selection */}
+        <div className="mb-6">
+          <label className="text-sm text-muted mb-2 block">Payment Method</label>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center bg-light p-3 rounded-xl border border-gray-200 hover:border-primary cursor-pointer transition-colors">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #037dd6, #8B5CF6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 700,
+                  marginRight: 12,
+                }}
+              >
+                M
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">MoonPay</div>
+                <div className="text-sm text-muted">Card, Apple Pay, Google Pay</div>
+              </div>
             </div>
-            <div className="flex-1">
-              <div className="font-medium">MoonPay</div>
-              <div className="text-sm text-muted">Карта, Apple Pay, Google Pay</div>
-            </div>
-          </div>
-          <div className="flex items-center bg-light p-3 rounded-xl border border-gray-200 hover:border-primary cursor-pointer transition-colors">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-              <span className="font-bold text-primary">T</span>
-            </div>
-            <div className="flex-1">
-              <div className="font-medium">Transak</div>
-              <div className="text-sm text-muted">Карта, банковский перевод</div>
+            <div className="flex items-center bg-light p-3 rounded-xl border border-gray-200 hover:border-primary cursor-pointer transition-colors">
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #037dd6, #8B5CF6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontWeight: 700,
+                  marginRight: 12,
+                }}
+              >
+                T
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">Transak</div>
+                <div className="text-sm text-muted">Card, Bank Transfer</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Сумма */}
-      <div className="mb-8">
-        <label htmlFor="amount" className="text-sm text-muted mb-2 block">Сумма в USD</label>
-        <div className="relative">
-          <input
-            id="amount"
-            type="number"
-            placeholder="0.00"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full p-3 pr-12 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
-          />
-          <span className="absolute right-4 top-3.5 text-md text-muted">USD</span>
+        {/* Amount */}
+        <div className="mb-8">
+          <label htmlFor="amount" className="text-sm text-muted mb-2 block">Amount in USD</label>
+          <div className="relative">
+            <input
+              id="amount"
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="input-field"
+              style={{ paddingRight: 50 }}
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-md text-muted">USD</span>
+          </div>
+          <p className="text-xs text-muted mt-1">Minimum: 30 USD</p>
         </div>
-        <p className="text-xs text-muted mt-1">Минимум: 30 USD</p>
+
+        {/* Buy Button */}
+        <button
+          onClick={handleBuy}
+          disabled={!amount || parseFloat(amount) <= 0}
+          className="primary-btn"
+          style={{ width: '100%' }}
+        >
+          Buy
+        </button>
+
+        <p className="text-xs text-muted text-center mt-4">
+          You will be redirected to the provider's website to complete the purchase.
+        </p>
       </div>
-
-      {/* Кнопка Купить */}
-      <button
-        onClick={handleBuy}
-        disabled={!amount || parseFloat(amount) <= 0}
-        className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-          amount && parseFloat(amount) > 0
-            ? 'bg-primary text-white hover:bg-primary-dark'
-            : 'bg-muted text-muted cursor-not-allowed'
-        }`}
-      >
-        Купить
-      </button>
-
-      <p className="text-xs text-muted text-center mt-4">
-        Вы будете перенаправлены на сайт провайдера для завершения покупки.
-      </p>
     </div>
   );
 };

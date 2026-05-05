@@ -1,5 +1,3 @@
-// extension/src/hooks/useTokens.ts
-
 import { useState, useEffect, useCallback } from 'react';
 
 export interface Token {
@@ -40,7 +38,7 @@ export function useTokens() {
         setTokens(result[STORAGE_KEY]);
       }
     } catch (e: any) {
-      setError('Ошибка загрузки токенов');
+      setError('Failed to load tokens');
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +49,7 @@ export function useTokens() {
       await getStorage().set({ [STORAGE_KEY]: newTokens });
       setTokens(newTokens);
     } catch (e: any) {
-      setError('Ошибка сохранения токенов');
+      setError('Failed to save tokens');
     }
   }, []);
 
@@ -68,14 +66,14 @@ export function useTokens() {
         (t) => t.contractAddress.toLowerCase() === token.contractAddress.toLowerCase()
       );
       if (exists) {
-        setError('Токен уже добавлен');
+        setError('Token already added');
         return;
       }
 
       const updatedTokens = [...currentTokens, token];
       await saveTokens(updatedTokens);
     } catch (e: any) {
-      setError('Ошибка добавления токена');
+      setError('Failed to add token');
     }
   }, [saveTokens]);
 
@@ -92,7 +90,7 @@ export function useTokens() {
       );
       await saveTokens(updatedTokens);
     } catch (e: any) {
-      setError('Ошибка удаления токена');
+      setError('Failed to remove token');
     }
   }, [saveTokens]);
 
@@ -107,7 +105,7 @@ export function useTokens() {
       });
       setTokens(currentTokens);
     } catch (e: any) {
-      setError('Не удалось обновить данные токенов');
+      setError('Failed to update token data');
     } finally {
       setIsLoading(false);
     }

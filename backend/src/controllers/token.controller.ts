@@ -1,5 +1,3 @@
-// backend/src/controllers/token.controller.ts
-
 import { Response, NextFunction } from 'express';
 import Token from '../models/token.model';
 import { AuthRequest } from '../middleware/auth';
@@ -19,18 +17,17 @@ export async function addToken(req: AuthRequest, res: Response, next: NextFuncti
   try {
     const { contractAddress, symbol, name, decimals, chainId } = req.body;
     if (!contractAddress || !symbol || !name || decimals == null || !chainId) {
-      res.status(400).json({ error: 'Все поля обязательны' });
+      res.status(400).json({ error: 'All fields are required' });
       return;
     }
 
-    // Проверка на дубликат (индекс сам не даст сохранить, но лучше явно)
     const exists = await Token.findOne({
       userId: req.userId,
       contractAddress: contractAddress.toLowerCase(),
       chainId,
     });
     if (exists) {
-      res.status(409).json({ error: 'Токен уже добавлен' });
+      res.status(409).json({ error: 'Token already added' });
       return;
     }
 
@@ -49,13 +46,12 @@ export async function addToken(req: AuthRequest, res: Response, next: NextFuncti
   }
 }
 
-// DELETE /api/tokens/:contractAddress
 export async function removeToken(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const contractAddress = req.params.contractAddress as string;
     const chainId = req.query.chainId as string;
     if (!chainId) {
-      res.status(400).json({ error: 'chainId обязателен' });
+      res.status(400).json({ error: 'chainId is required' });
       return;
     }
     const deleted = await Token.findOneAndDelete({
@@ -64,10 +60,10 @@ export async function removeToken(req: AuthRequest, res: Response, next: NextFun
       chainId: Number(chainId),
     });
     if (!deleted) {
-      res.status(404).json({ error: 'Токен не найден' });
+      res.status(404).json({ error: 'Token not found' });
       return;
     }
-    res.json({ message: 'Токен удалён' });
+    res.json({ message: 'Token removed' });
   } catch (error) {
     next(error);
   }

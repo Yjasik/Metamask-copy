@@ -21,12 +21,12 @@ export async function register(req: Request, res: Response, next: NextFunction) 
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({ error: 'Email и пароль обязательны' });
+      res.status(400).json({ error: 'Email and password are required' });
       return;
     }
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      res.status(409).json({ error: 'Пользователь с таким email уже существует' });
+      res.status(409).json({ error: 'A user with this email already exists' });
       return;
     }
 
@@ -39,7 +39,7 @@ export async function register(req: Request, res: Response, next: NextFunction) 
     await user.save();
 
     res.status(201).json({
-      message: 'Регистрация успешна',
+      message: 'Registration successful',
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
@@ -52,19 +52,19 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({ error: 'Email и пароль обязательны' });
+      res.status(400).json({ error: 'Email and password are required' });
       return;
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      res.status(401).json({ error: 'Неверный email или пароль' });
+      res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      res.status(401).json({ error: 'Неверный email или пароль' });
+      res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
 
@@ -85,7 +85,7 @@ export async function refreshToken(req: Request, res: Response, next: NextFuncti
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
-      res.status(400).json({ error: 'Refresh токен обязателен' });
+      res.status(400).json({ error: 'Refresh token is required' });
       return;
     }
 
@@ -96,13 +96,13 @@ export async function refreshToken(req: Request, res: Response, next: NextFuncti
         process.env.JWT_REFRESH_SECRET || 'default-refresh-secret'
       );
     } catch {
-      res.status(401).json({ error: 'Недействительный refresh токен' });
+      res.status(401).json({ error: 'Invalid refresh token' });
       return;
     }
 
     const user = await User.findById(payload.userId);
     if (!user || user.refreshToken !== refreshToken) {
-      res.status(401).json({ error: 'Токен не найден или уже использован' });
+      res.status(401).json({ error: 'Token not found or already used' });
       return;
     }
 
@@ -129,7 +129,7 @@ export async function logout(req: Request, res: Response, next: NextFunction) {
         await user.save();
       }
     }
-    res.json({ message: 'Выход выполнен' });
+    res.json({ message: 'Logged out successfully' });
   } catch (error) {
     next(error);
   }

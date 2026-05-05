@@ -2,102 +2,129 @@ import React, { useState } from 'react';
 
 interface SendScreenProps {
   onBack: () => void;
+  wallet: {
+    balance: string;
+    address: string | null;
+    chain: { name: string };
+    sendTransaction: (to: string, amount: string) => Promise<any>;
+  };
 }
 
-const SendScreen: React.FC<SendScreenProps> = ({ onBack }) => {
+const SendScreen: React.FC<SendScreenProps> = ({ onBack, wallet }) => {
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
-  const mockBalance = 2.793; // ETH
+  const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     setError('');
+    setSuccess('');
     if (!recipient.trim()) {
-      setError('Введите адрес получателя');
+      setError('Enter recipient address');
       return;
     }
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) {
-      setError('Введите корректную сумму');
+      setError('Enter a valid amount');
       return;
     }
-    if (amt > mockBalance) {
-      setError('Недостаточно средств');
+    if (amt > parseFloat(wallet.balance)) {
+      setError('Insufficient funds');
       return;
     }
-    // TODO: Логика отправки через viem
-    alert(`Отправка ${amt} ETH на ${recipient}`);
-    // После успешной отправки можно вернуться назад
-    // onBack();
+    setIsLoading(true);
+    try {
+      const txHash = await wallet.sendTransaction(recipient.trim(), amount);
+      setSuccess(`Transaction sent: ${txHash}`);
+      setRecipient('');
+      setAmount('');
+    } catch (e: any) {
+      setError(e.message || 'Send failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col flex-1 p-4">
-      <div className="flex items-center mb-6">
-        <h2 className="text-lg font-semibold">Отправить</h2>
-      </div>
+      {/* Back button */}
+      <div className="card">
+        <h2 className="text-lg font-semibold mb-4" style={{ textAlign: 'center' }}>
+          Send
+        </h2>
 
-      {/* Актив и баланс */}
-      <div className="mb-6 bg-light p-4 rounded-xl">
-        <div className="flex items-center justify-between">
+        {/* Balance display */}
+        <div className="bg-light p-4 rounded-xl mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #037dd6, #8B5CF6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: 16,
+              }}
+            >
               E
             </div>
-            <span className="font-medium">ETH</span>
+            <span className="font-semibold">{wallet.chain.name} ETH</span>
           </div>
-          <span className="text-sm text-muted">{mockBalance} ETH</span>
+          <span className="text-sm text-muted">{wallet.balance} ETH</span>
         </div>
-      </div>
 
-      {/* Поле адреса */}
-      <div className="mb-4">
-        <label className="text-sm text-muted mb-2 block">Адрес получателя</label>
-        <input
-          type="text"
-          placeholder="0x..."
-          value={recipient}
-          onChange={(e) => { setRecipient(e.target.value); setError(''); }}
-          className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary font-mono"
-        />
-      </div>
-
-      {/* Поле суммы */}
-      <div className="mb-6">
-        <label className="text-sm text-muted mb-2 block">Сумма</label>
-        <div className="relative">
+        <div className="mb-4">
+          <label className="text-sm text-muted mb-2 block">Recipient Address</label>
           <input
-            type="number"
-            placeholder="0.00"
-            value={amount}
-            onChange={(e) => { setAmount(e.target.value); setError(''); }}
-            className="w-full p-3 pr-16 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
+            type="text"
+            placeholder="0x..."
+            value={recipient}
+            onChange={(e) => { setRecipient(e.target.value); setError(''); setSuccess(''); }}
+            className="input-field"
+            style={{ fontFamily: 'monospace' }}
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <span className="text-sm text-muted">ETH</span>
-            <button
-              className="text-primary text-xs font-medium hover:underline"
-              onClick={() => setAmount(mockBalance.toString())}
-            >
-              MAX
-            </button>
+        </div>
+
+        <div className="mb-6">
+          <label className="text-sm text-muted mb-2 block">Amount</label>
+          <div className="relative">
+            <input
+              type="number"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => { setAmount(e.target.value); setError(''); setSuccess(''); }}
+              className="input-field"
+              style={{ paddingRight: 70 }}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <span className="text-sm text-muted">ETH</span>
+              <button
+                className="text-primary text-xs font-medium hover:underline"
+                onClick={() => setAmount(wallet.balance)}
+              >
+                MAX
+              </button>
+            </div>
           </div>
         </div>
+
+        {error && <p className="text-danger text-sm mb-4">{error}</p>}
+        {success && <p className="text-success text-sm mb-4">{success}</p>}
+
+        <button
+          onClick={handleSend}
+          disabled={!recipient.trim() || !amount.trim() || isLoading}
+          className="primary-btn"
+          style={{ width: '100%' }}
+        >
+          {isLoading ? 'Sending...' : 'Send'}
+        </button>
       </div>
-
-      {error && <p className="text-danger text-sm mb-4">{error}</p>}
-
-      <button
-        onClick={handleSend}
-        disabled={!recipient.trim() || !amount.trim()}
-        className={`w-full py-3 rounded-xl font-semibold transition-colors ${
-          recipient.trim() && amount.trim()
-            ? 'bg-primary text-white hover:bg-primary-dark'
-            : 'bg-muted text-muted cursor-not-allowed'
-        }`}
-      >
-        Отправить
-      </button>
     </div>
   );
 };

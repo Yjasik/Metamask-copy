@@ -1,23 +1,66 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import TokenList from './TokenList';
+import { useTokens } from '../hooks/useTokens';
+import ActivityTab from './ActivityTab';
 
 interface DashboardProps {
-  onNavigate: (screen: 'send' | 'buy' | 'import') => void;
+  onNavigate: (screen: 'send' | 'buy' | 'import' | 'addToken') => void;
   walletData?: {
     address: string | null;
     balance: string;
     fetchBalance: () => Promise<void>;
-    chain: { name: string };
+    chain: { name: string; id: number };
   };
-  onLogout: () => void; // <-- новый проп
+  onLogout: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData, onLogout }) => {
+  const [activeTab, setActiveTab] = React.useState<'tokens' | 'activity'>('tokens');
+  const { tokens: storedTokens } = useTokens();
+
+  const formatBalance = (value: string) => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0.000';
+    return num.toFixed(3);
+  };
+
+  const displayTokens = useMemo(() => {
+    const result: {
+      symbol: string;
+      name: string;
+      balance: string;
+      usdValue: string;
+      iconLetter: string;
+      contractAddress?: string;
+    }[] = [];
+
+    result.push({
+      symbol: 'ETH',
+      name: 'Ethereum',
+      balance: walletData?.balance || '0',
+      usdValue: '$0.00',
+      iconLetter: 'E',
+    });
+
+    for (const t of storedTokens) {
+      result.push({
+        symbol: t.symbol,
+        name: t.name,
+        balance: t.balance || '0',
+        usdValue: t.usdValue || '$0.00',
+        iconLetter: t.symbol.charAt(0).toUpperCase(),
+        contractAddress: t.contractAddress,
+      });
+    }
+
+    return result;
+  }, [walletData?.balance, storedTokens]);
+
   useEffect(() => {
     if (walletData?.address) {
       walletData.fetchBalance();
     }
-  }, [walletData?.address]);
+  }, [walletData?.address, walletData?.chain?.id]);
 
   const formattedAddress = walletData?.address
     ? `${walletData.address.slice(0, 6)}...${walletData.address.slice(-4)}`
@@ -25,10 +68,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData, onLogout 
 
   return (
     <div className="flex flex-col flex-1">
-      {/* Баланс и кнопка выхода в одной строке */}
+      {/* Balance and logout button */}
       <div className="balance-display relative">
         <div className="balance-amount">
-          {walletData?.balance || '0'} {walletData?.chain?.name || 'ETH'}
+          {formatBalance(walletData?.balance || '0')} {walletData?.chain?.name || 'ETH'}
         </div>
         <div className="balance-fiat">
           {walletData?.address ? (
@@ -37,59 +80,72 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, walletData, onLogout 
             '$0.00 USD'
           )}
         </div>
-        {/* Кнопка выхода справа вверху */}
         <button
           onClick={onLogout}
           className="absolute top-2 right-2 text-xs text-muted hover:text-danger transition-colors"
-          title="Выйти"
+          title="Logout"
         >
-          Выйти
+          Logout
         </button>
       </div>
 
-      {/* Кнопки действий */}
+      {/* Action buttons */}
       <div className="action-buttons">
         <button className="action-btn" onClick={() => onNavigate('buy')}>
           <div className="icon icon-buy" />
-          <span className="label">Купить</span>
+          <span className="label">Buy</span>
         </button>
         <button className="action-btn" onClick={() => onNavigate('send')}>
           <div className="icon icon-send" />
-          <span className="label">Отправить</span>
+          <span className="label">Send</span>
         </button>
         <button className="action-btn" onClick={() => {}}>
           <div className="icon icon-swap" />
-          <span className="label">Обменять</span>
+          <span className="label">Swap</span>
         </button>
         <button className="action-btn" onClick={() => onNavigate('import')}>
           <div className="icon icon-receive" />
-          <span className="label">Получить</span>
+          <span className="label">Receive</span>
         </button>
       </div>
 
-      {/* Вкладки */}
+      {/* Tabs */}
       <div className="tabs">
-        <button className="tab active">Токены</button>
-        <button className="tab">DeFi</button>
-        <button className="tab">NFT</button>
-        <button className="tab">Деятельность</button>
+        <button
+          onClick={() => setActiveTab('tokens')}
+          className={`tab ${activeTab === 'tokens' ? 'active' : ''}`}
+        >
+          Tokens
+        </button>
+        <button
+          onClick={() => setActiveTab('activity')}
+          className={`tab ${activeTab === 'activity' ? 'active' : ''}`}
+        >
+          Activity
+        </button>
+        <button
+          onClick={() => onNavigate('addToken')}
+          className="tab ml-auto"
+        >
+          Add Token
+        </button>
       </div>
 
-      {/* Список токенов */}
-      <TokenList
-        tokens={[
-          {
-            symbol: 'ETH',
-            name: 'Ethereum',
-            balance: walletData?.balance || '0',
-            usdValue: '$0.00',
-            iconLetter: 'E',
-          },
-        ]}
-        onTokenClick={(token) => {
-          console.log('Token clicked:', token.name);
-        }}
-      />
+      {/* Tab content */}
+      {activeTab === 'tokens' && (
+        <TokenList
+          tokens={displayTokens}
+          onTokenClick={(token) => {
+            console.log('Token clicked:', token.name);
+          }}
+        />
+      )}
+      {activeTab === 'activity' && (
+        <ActivityTab 
+          address={walletData?.address || null}
+          chainId={walletData?.chain?.id || 1}
+        />
+      )}
     </div>
   );
 };

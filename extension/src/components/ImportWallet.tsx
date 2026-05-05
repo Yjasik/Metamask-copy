@@ -26,14 +26,14 @@ const ImportWallet: React.FC<ImportWalletProps> = ({ onBack, wallet, onImportSuc
       if (activeTab === 'seed') {
         const words = seedPhrase.trim().split(/\s+/);
         if (words.length !== 12 && words.length !== 24) {
-          setError('Секретная фраза должна состоять из 12 или 24 слов');
+          setError('Secret Recovery Phrase must be 12 or 24 words');
           setIsLoading(false);
           return;
         }
         await wallet.importFromMnemonic(seedPhrase.trim(), password);
       } else {
         if (!privateKey.startsWith('0x') || privateKey.length !== 66) {
-          setError('Введите корректный приватный ключ (66 символов, начиная с 0x)');
+          setError('Enter a valid private key (66 characters, starting with 0x)');
           setIsLoading(false);
           return;
         }
@@ -41,7 +41,7 @@ const ImportWallet: React.FC<ImportWalletProps> = ({ onBack, wallet, onImportSuc
       }
       onImportSuccess();
     } catch (e: any) {
-      setError(e.message || 'Ошибка импорта кошелька');
+      setError(e.message || 'Wallet import failed');
     } finally {
       setIsLoading(false);
     }
@@ -49,78 +49,68 @@ const ImportWallet: React.FC<ImportWalletProps> = ({ onBack, wallet, onImportSuc
 
   return (
     <div className="flex flex-col flex-1 p-4">
+      {/* Header and back button */}
       <div className="flex items-center mb-6">
-        <h2 className="text-lg font-semibold">Импорт кошелька</h2>
+        <h2 className="text-lg font-semibold">Import Wallet</h2>
       </div>
 
       <p className="text-sm text-muted mb-4">
-        Импортируйте существующий кошелёк с помощью секретной фразы или приватного ключа.
+        Import an existing wallet using your Secret Recovery Phrase or private key.
       </p>
 
+      {/* Import method tabs */}
       <div className="tabs mb-4">
         <button
           className={`tab ${activeTab === 'seed' ? 'active' : ''}`}
           onClick={() => { setActiveTab('seed'); setError(''); }}
         >
-          Секретная фраза
+          Secret Recovery Phrase
         </button>
         <button
           className={`tab ${activeTab === 'privateKey' ? 'active' : ''}`}
           onClick={() => { setActiveTab('privateKey'); setError(''); }}
         >
-          Приватный ключ
+          Private Key
         </button>
       </div>
 
+      {/* Seed phrase form */}
       {activeTab === 'seed' && (
         <div className="flex flex-col gap-4">
-          <div>
-            <label className="text-sm text-muted mb-2 block">
-              Введите вашу секретную фразу
-            </label>
-            <textarea
-              className="w-full p-3 border border-gray-300 rounded-xl text-md resize-none focus:outline-none focus:border-primary"
-              rows={5}
-              placeholder="Введите слова через пробел"
-              value={seedPhrase}
-              onChange={(e) => { setSeedPhrase(e.target.value); setError(''); }}
-            />
-          </div>
-          <div>
-            <label className="text-sm text-muted mb-2 block">Новый пароль для шифрования</label>
-            <input
-              type="password"
-              className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
-              placeholder="Придумайте пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <textarea
+            className="input-field resize-none"
+            rows={5}
+            placeholder="Enter words separated by spaces"
+            value={seedPhrase}
+            onChange={(e) => { setSeedPhrase(e.target.value); setError(''); }}
+          />
+          <input
+            type="password"
+            className="input-field"
+            placeholder="New encryption password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
       )}
 
+      {/* Private key form */}
       {activeTab === 'privateKey' && (
         <div className="flex flex-col gap-4">
-          <div>
-            <label className="text-sm text-muted mb-2 block">Приватный ключ</label>
-            <input
-              type="text"
-              className="w-full p-3 border border-gray-300 rounded-xl text-md font-mono focus:outline-none focus:border-primary"
-              placeholder="0x..."
-              value={privateKey}
-              onChange={(e) => { setPrivateKey(e.target.value); setError(''); }}
-            />
-          </div>
-          <div>
-            <label className="text-sm text-muted mb-2 block">Новый пароль для шифрования</label>
-            <input
-              type="password"
-              className="w-full p-3 border border-gray-300 rounded-xl text-md focus:outline-none focus:border-primary"
-              placeholder="Придумайте пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <input
+            type="text"
+            className="input-field font-mono"
+            placeholder="0x..."
+            value={privateKey}
+            onChange={(e) => { setPrivateKey(e.target.value); setError(''); }}
+          />
+          <input
+            type="password"
+            className="input-field"
+            placeholder="New encryption password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
       )}
 
@@ -133,15 +123,9 @@ const ImportWallet: React.FC<ImportWalletProps> = ({ onBack, wallet, onImportSuc
           (activeTab === 'seed' && (!seedPhrase.trim() || !password.trim())) ||
           (activeTab === 'privateKey' && (!privateKey.trim() || !password.trim()))
         }
-        className={`mt-6 w-full py-3 rounded-xl font-semibold transition-colors ${
-          !isLoading &&
-          ((activeTab === 'seed' && seedPhrase.trim() && password.trim()) ||
-            (activeTab === 'privateKey' && privateKey.trim() && password.trim()))
-            ? 'bg-primary text-white hover:bg-primary-dark'
-            : 'bg-muted text-muted cursor-not-allowed'
-        }`}
+        className="primary-btn mt-6"
       >
-        {isLoading ? 'Импорт...' : 'Импортировать'}
+        {isLoading ? 'Importing...' : 'Import'}
       </button>
     </div>
   );
